@@ -15,7 +15,7 @@ public class CcWc {
         boolean wordFlag = false;
         boolean charFlag = false;
         boolean defaultFlag = true;
-        String inputFile = null;
+        String inputFile = "";
 
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-c")) {
@@ -31,73 +31,38 @@ public class CcWc {
             }
         }
 
-        if (inputFile == null && args[0].equals("-l")) {
-            // running from stdin
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-
-            String line = reader.readLine();
-
-
-            reader.close();
+        if (bytesFlag || lineFlag || wordFlag || charFlag) {
+            defaultFlag = false;
         }
 
-        if (bytesFlag && inputFile != null) {
-            long bytes = getBytes(inputFile);
-            System.out.println(" " + bytes + " " + inputFile);
+        if (bytesFlag) {
+            System.out.println(getBytes(inputFile) + " " + inputFile);
         }
 
-        if (lineFlag && inputFile != null) {
-            try {
-                long lines = getLines(inputFile);
-                System.out.println(lines + " " + inputFile);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        if (lineFlag) {
+            System.out.println(getLines(inputFile) + " " + inputFile);
         }
 
-        if (args[0].equals("-lf")) {
-            String filePath = "input.txt"; // Replace with your file path
-            Path path = Paths.get(inputFile);
-
-            try (Stream<String> lines = Files.lines(path)) {
-                long lineCount = lines.count();
-                System.out.println(lineCount + " " + inputFile);
-            } catch (IOException e) {
-                System.err.println("Error reading file: " + e.getMessage());
-            }
+        if (wordFlag) {
+            System.out.println(getWords(inputFile) + " " + inputFile);
         }
 
-        if (args[0].equals("-w")) {
-            long words = 0;
-            try {
-                words = getWords(inputFile);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            System.out.println(words + " " + inputFile);
+        if (charFlag) {
+            System.out.println(getChars(inputFile) + " " + inputFile);
         }
 
-        if (args[0].equals("-m")) {
-            getChars(inputFile);
+        if (defaultFlag) {
+            System.out.println(getLines(inputFile) + " " +
+                    getWords(inputFile) + " " +
+                    getBytes(inputFile) + " " + inputFile);
         }
 
-        if (args.length == 1) {
-            inputFile = args[0];
-            try {
-                long bytes = getBytes(inputFile);
-                long words = getWords(inputFile);
-                long lines = getLines(inputFile);
-                System.out.println(lines + "   " + words + "  " + bytes + " " + inputFile);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
-    private static long getWords(String fileInput) throws IOException {
-        BufferedReader reader = (fileInput != null ?
-                new BufferedReader(new FileReader(fileInput)) :
-                new BufferedReader(new InputStreamReader(System.in)));
+    private static long getWords(String inputFile) throws IOException {
+        BufferedReader reader = (inputFile.isEmpty() ?
+                new BufferedReader(new InputStreamReader(System.in)) :
+                new BufferedReader(new FileReader(inputFile)));
 
         long wordCount = 0;
         String line;
@@ -108,10 +73,10 @@ public class CcWc {
         return wordCount;
     }
 
-    private static long getLines(String fileInput) throws IOException {
-        BufferedReader reader = (fileInput != null ?
-                new BufferedReader(new FileReader(fileInput)) :
-                new BufferedReader(new InputStreamReader(System.in)));
+    private static long getLines(String inputFile) throws IOException {
+        BufferedReader reader = (inputFile.isEmpty() ?
+                new BufferedReader(new InputStreamReader(System.in)) :
+                new BufferedReader(new FileReader(inputFile)));
 
         String line;
         long lineCount = 0;
@@ -121,22 +86,22 @@ public class CcWc {
         return lineCount;
     }
 
-    private static long getBytes(String fileInput) throws IOException {
-        InputStreamReader reader = (fileInput != null ?
-                new InputStreamReader(new FileInputStream(fileInput)) :
-                new InputStreamReader(System.in));
+    private static long getBytes(String inputFile) throws IOException {
+        InputStream is = (inputFile.isEmpty() ?
+                System.in :
+                new FileInputStream(inputFile));
 
         int bytes = 0;
-        while (reader.read() != -1) {
+        while (is.read() != -1) {
             bytes++;
         }
         return bytes;
     }
 
-    private static long getChars(String fileInput) throws IOException {
-        InputStreamReader reader = (fileInput != null ?
-                new InputStreamReader(new FileInputStream(fileInput)) :
-                new InputStreamReader(System.in));
+    private static long getChars(String inputFile) throws IOException {
+        InputStreamReader reader = (inputFile.isEmpty() ?
+                new InputStreamReader(System.in) :
+                new InputStreamReader(new FileInputStream(inputFile)));
 
         long charCount = 0;
         while (reader.read() != -1) {

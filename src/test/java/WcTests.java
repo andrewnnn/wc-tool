@@ -2,13 +2,14 @@ import org.example.CcWc;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WcTests {
 
     @Test
-    public void testFileBytes() {
+    public void testFileBytes() throws IOException {
         // Save the original System.out
         PrintStream originalOut = System.out;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -31,7 +32,7 @@ public class WcTests {
     }
 
     @Test
-    public void testLines() {
+    public void testLines() throws IOException {
         // Save the original System.out
         PrintStream originalOut = System.out;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -54,30 +55,7 @@ public class WcTests {
     }
 
     @Test
-    public void testLinesFunc() {
-        // Save the original System.out
-        PrintStream originalOut = System.out;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream newOut = new PrintStream(baos);
-
-        // Redirect System.out to the ByteArrayOutputStream
-        System.setOut(newOut);
-
-        try {
-            // run main program get output stream
-            CcWc.main(new String[]{"-lf", "test.txt"});
-
-            String capturedOutput = baos.toString();
-            assertEquals("7145 test.txt", capturedOutput.trim());
-
-        } finally {
-            // Restore the original System.out
-            System.setOut(originalOut);
-        }
-    }
-
-    @Test
-    public void testWordCount() {
+    public void testWordCount() throws IOException {
         // Save the original System.out
         PrintStream originalOut = System.out;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -100,7 +78,7 @@ public class WcTests {
     }
 
     @Test
-    public void testCharCount() {
+    public void testCharCount() throws IOException {
         PrintStream originalOut = System.out;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream newOut = new PrintStream(baos);
@@ -122,7 +100,7 @@ public class WcTests {
     }
 
     @Test
-    public void testDefaultOption() {
+    public void testDefaultOption() throws IOException {
         PrintStream originalOut = System.out;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream newOut = new PrintStream(baos);
@@ -135,7 +113,7 @@ public class WcTests {
             CcWc.main(new String[]{"test.txt"});
 
             String capturedOutput = baos.toString();
-            assertEquals("7145   58164  342190 test.txt", capturedOutput.trim());
+            assertEquals("7145 58164 342190 test.txt", capturedOutput.trim());
 
         } finally {
             // Restore the original System.out
@@ -146,7 +124,8 @@ public class WcTests {
     @Test
     public void testStdin() throws IOException {
         Runtime rt = Runtime.getRuntime();
-        Process pr = rt.exec("cat test.txt | ./ccwc.sh -l");
+        ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", "cat test.txt | ./ccwc.sh -l");
+        Process pr = b.start();
 
         BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
         String line=input.readLine();
